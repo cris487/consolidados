@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplicación</title>
+
+  <!-- Incluir la librería XLSX desde un CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+
+  <!-- Enlace al archivo de estilos CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  
+<!-- Subpantalla de Contraseña -->
+<div id="password-modal" class="modal">
+  <div class="modal-content">
+    <h2>Introduzca la Contraseña</h2>
+    <input type="password" id="password-input" placeholder="Contraseña" />
+    <button onclick="verifyPassword()">Aceptar</button>
+    <button onclick="closePasswordModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Subpantalla de Contraseña Incorrecta -->
+<div id="incorrect-password-modal" class="modal">
+  <div class="modal-content">
+    <h2>Contraseña Incorrecta</h2>
+    <p>La contraseña que has introducido es incorrecta. Intenta de nuevo.</p>
+    <button onclick="closeIncorrectPasswordModal()">Cerrar</button>
+  </div>
+</div>
+
+  
+<!-- Pantalla de bienvenida -->
+<div id="welcome-screen" style="display:block;">
+  <h1>             </h1>
+  <button onclick="showPasswordModal()">Editor</button>
+  <button onclick="goToSelectionScreen('usuario')">Usuario</button>
+</div>
+
+<!-- Modal para la contraseña -->
+<div id="password-modal" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.7); padding: 20px; border-radius: 10px; text-align: center; z-index: 1000;">
+  <div style="background-color: white; padding: 20px; border-radius: 10px; max-width: 300px; margin: auto;">
+    <h3>Ingresar Contraseña</h3>
+    <input type="password" id="password-input" placeholder="Contraseña" style="padding: 10px; font-size: 16px; margin-bottom: 15px; width: 100%; border-radius: 5px;"/>
+    <div>
+      <button onclick="verifyPassword()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 8px;">Aceptar</button>
+      <button onclick="closePasswordModal()" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; border-radius: 8px;">Cancelar</button>
+    </div>
+  </div>
+</div>
+  <!-- Pantalla de selección de formatos -->
+  <div id="selection-screen" style="display: none;">
+    <h1>Consolidados Servicios Ambientales</h1>
+    <button onclick="goToFormatScreen()">Seleccionar formato</button>
+    <button onclick="goBackToWelcome()">Volver Atrás</button>
+    <div id="comment-icon" onclick="openCommentModal()"></div>
+</div>
+
+<!-- Modal para escribir un mensaje -->
+<div id="comment-modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <h2>Escribe tu Comentario</h2>
+    <textarea id="comment-text" rows="4" cols="50" placeholder="Escribe tu mensaje aquí..."></textarea>
+    <br>
+    <button onclick="submitComment()">Guardar Comentario</button>
+    <button onclick="closeModal('comment-modal')">Cerrar</button>
+  </div>
+</div>
+
+  <!-- Modal de exportar formato -->
+  <div id="export-format-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h2>Exportar Formato</h2>
+      <button onclick="exportAllFormats()">Exportar Todos los Formatos</button>
+      <br>
+      <p>O elige un formato específico:</p>
+      <input type="text" id="export-format-code" placeholder="Código de formato">
+      <button onclick="exportSingleFormat()">Exportar Formato Específico</button>
+      <button onclick="closeModal('export-format-modal')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Pantalla de formatos -->
+  <div id="home-screen" style="display: none;">
+    <h1>Selecciona un formato</h1>
+    <div id="format-buttons"></div>
+    <button id="add-format-btn" onclick="addFormat()" style="display: none;">Agregar Formato</button>
+    <button id="delete-format-btn" onclick="deleteFormatPrompt()" style="display: none;">Eliminar Formato</button>
+    <button onclick="showExportModal()">Exportar Formato</button>
+    <button onclick="goBackToSelection()">Volver Atrás</button>
+  </div>
+
+  <!-- Pantalla de tabla dinámica -->
+  <div id="table-screen" style="display: none;">
+    <h1>Tabla Formato <span id="selected-format"></span></h1>
+    <table id="dynamic-table"></table>
+    <button onclick="goBack()">Volver Atrás</button>
+    <button id="add-column-btn" onclick="addColumn()" style="display: none;">Agregar Columna</button>
+    <button id="delete-column-btn" onclick="deleteColumn()" style="display: none;">Eliminar Columna</button>
+    <button onclick="addRow()">Agregar Fila</button>
+    <button onclick="deleteRow()">Eliminar Fila</button>
+    <button id="clear-table-btn" onclick="clearTableData()">Borrar Datos Tabla</button>
+
+  </div>
+
+  <!-- Modal para agregar formato -->
+  <div id="add-format-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h2>Agregar Formato</h2>
+      <p>Introduce el código del nuevo formato (por ejemplo, 26):</p>
+      <input type="text" id="new-format-code">
+      <button onclick="submitAddFormat()">Agregar</button>
+      <button onclick="closeModal('add-format-modal')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal para eliminar formato -->
+  <div id="delete-format-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h2>Eliminar Formato</h2>
+      <p>Introduce el código del formato que deseas eliminar:</p>
+      <input type="text" id="format-code-to-delete">
+      <button onclick="submitDeleteFormat()">Eliminar</button>
+      <button onclick="closeModal('delete-format-modal')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal de éxito al agregar formato -->
+  <div id="success-add-format-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h2>Formato Agregado Exitosamente</h2>
+      <button onclick="closeModal('success-add-format-modal')">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Enlace al archivo JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
